@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "A javascript web crawler",
   "main": "main.js",
-  "type": "module",
   "scripts": {
     "start": "node main.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
@@ -26,5 +25,8 @@
   "homepage": "https://github.com/BerylCAtieno/javascript-web-crawler#readme",
   "devDependencies": {
     "jest": "^29.7.0"
+  },
+  "dependencies": {
+    "jsdom": "^24.1.0"
   }
 }
