@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "start": "node main.js",
-    "test": "console.log(\"hello world\")"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "jest": {
+    "transform": {}
   },
   "repository": {
     "type": "git",
@@ -20,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/BerylCAtieno/javascript-web-crawler/issues"
   },
-  "homepage": "https://github.com/BerylCAtieno/javascript-web-crawler#readme"
+  "homepage": "https://github.com/BerylCAtieno/javascript-web-crawler#readme",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
 }
