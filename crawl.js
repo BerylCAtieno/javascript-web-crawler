@@ -1,27 +1,38 @@
 const { JSDOM }  = require('jsdom')
 
-async function crawlPage(currentURL) {
+async function crawlPage(baseURL, currentURL = baseURL, pages= {}) {
   
-  try {
-    const response = await fetch(currentURL)
-    if (response.status > 399) {
-      console.log(`error in fetch with status code: ${response.status} on page: ${currentURL}`)
-      return 
-    }
+  baseURLObj = new URL(baseURL)
+  currentURLObj = new URL(currentURL)
 
-    const contentType = response.headers.get("content-type")
-    if (!contentType.includes("text/html")) {
-      console.log(`non html content type: ${contentType} on page: ${currentURL}`)
-      return
-    }
-
-    console.log(`=====actively crawling ${currentURL}=====`)
-    console.log( await response.text())
-
-
-  } catch (error) {
-    console.log(`Error: ${error.message} in ${currentURL}`)
+  if (baseURLObj.hostname !== currentURLObj.hostname) {
+    return pages
   }
+
+  const normalizedCurrentURL = normalizeURL(currentURL)
+
+  if (pages[normalizedCurrentURL] > 0) {
+    pages[normalizedCurrentURL]++
+    return pages
+  }
+  pages[normalizedCurrentURL] = 1
+  
+  console.log(`=====actively crawling ${currentURL}=====`)
+  let html = ''
+  try {
+    html = await fetchHTML(currentURL)
+  } catch (err) {
+    console.log(`${err.message}`)
+    return pages
+  }
+
+  // recur through the page's links
+  const nextURLs = getURLsFromHTML(html, baseURL)
+  for (const nextURL of nextURLs) {
+    pages = await crawlPage(baseURL, nextURL, pages)
+  }
+
+  return pages
 }
 
 function getURLsFromHTML(html, baseURL) {
@@ -55,6 +66,26 @@ function normalizeURL(urlString) {
     } else {
         return hostPath
     }
+}
+
+async function fetchHTML(url) {
+  let response
+  try {
+    response = await fetch(url)
+  } catch (err) {
+    throw new Error(`Got Network error: ${err.message}`)
+  }
+
+  if (response.status > 399) {
+    throw new Error(`Got HTTP error: ${response.status} ${response.statusText}`)
+  }
+
+  const contentType = response.headers.get('content-type')
+  if (!contentType || !contentType.includes('text/html')) {
+    throw new Error(`Got non-HTML response: ${contentType}`)
+  }
+
+  return response.text()
 }
 
 module.exports = { getURLsFromHTML, 
