@@ -1,5 +1,29 @@
 const { JSDOM }  = require('jsdom')
 
+async function crawlPage(currentURL) {
+  
+  try {
+    const response = await fetch(currentURL)
+    if (response.status > 399) {
+      console.log(`error in fetch with status code: ${response.status} on page: ${currentURL}`)
+      return 
+    }
+
+    const contentType = response.headers.get("content-type")
+    if (!contentType.includes("text/html")) {
+      console.log(`non html content type: ${contentType} on page: ${currentURL}`)
+      return
+    }
+
+    console.log(`=====actively crawling ${currentURL}=====`)
+    console.log( await response.text())
+
+
+  } catch (error) {
+    console.log(`Error: ${error.message} in ${currentURL}`)
+  }
+}
+
 function getURLsFromHTML(html, baseURL) {
     const urls = []
     const dom = new JSDOM(html)
@@ -34,5 +58,6 @@ function normalizeURL(urlString) {
 }
 
 module.exports = { getURLsFromHTML, 
-        normalizeURL
+        normalizeURL,
+        crawlPage
  };
